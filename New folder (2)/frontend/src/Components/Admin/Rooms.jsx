@@ -52,7 +52,7 @@ const options = {
 }
 console.log(data, "this is boxes")
 
-fetch("http://localhost:8000/add-room", options).then((res) => res.json())
+fetch("http://localhost:8000/room/add", options).then((res) => res.json())
     .then((resData) => console.log(resData))
     .catch((err) => console.log(err))
 }

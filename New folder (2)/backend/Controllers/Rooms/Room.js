@@ -1,4 +1,4 @@
-const {DataModel} = require("../Entity/model")
+const {DataModel} = require("../../Entity/model")
 
 const add_room = async(req,res) =>{
     let {name, boxes} = req.body
@@ -14,6 +14,11 @@ const add_room = async(req,res) =>{
     }
 }
 
+const get_all_rooms = async(req,res) =>{
+    let rooms = await DataModel.find()
+    res.send(rooms)
+}
 module.exports = {
-    add_room
+    add_room,
+    get_all_rooms
 }

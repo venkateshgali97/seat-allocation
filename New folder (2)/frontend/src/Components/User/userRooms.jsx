@@ -1,98 +1,115 @@
+
+
 import React, { useState, useEffect } from 'react';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import {toast } from 'react-toastify';
 
 const UserRooms = () => {
-  const [roomDetails, setRoomDetails] = useState([
-    {
-      name: 'falcon',
-      rows: 5,
-      cols: 6,
-    },
-    {
-      name: 'aurum',
-      rows: 5,
-      cols: 6,
-    },
-    
-    {
-      name: 'tardis',
-      rows: 5,
-      cols: 6,
-    }
-  ]);
+  const [roomDetails, setRoomDetails] = useState([]);
+  const [showModal, setShowModal] = useState(false); // State to manage modal visibility
+const [selectedRoomDetils,setSelectedRoomDetails] = useState({
+  name : "",
+  id : "",
+  colIndex : "",
+  rowIndex : "",
+  roomIndex : ""
+})
+  const getAllRooms = () => {
+    const options = {
+      method: 'get',
+      headers: {
+        'Content-Type': 'Application/json',
+        accept: 'Application/json',
+      },
+    };
 
-  const [rooms, setRooms] = useState([]);
+    fetch('http://localhost:8000/room/getAll', options)
+      .then((res) => res.json())
+      .then((resData) => {
+        console.log(resData);
+        setRoomDetails(resData);
+      })
+      .catch((err) => console.log(err));
+  };
 
   useEffect(() => {
-    createRooms();
+    getAllRooms();
   }, []);
 
-  const createRooms = () => {
-    const newRooms = roomDetails.map((room) => {
-      const { rows, cols } = room;
-      const newBoxes = [];
-
-      for (let i = 0; i < rows; i++) {
-        const row = [];
-        for (let j = 0; j < cols; j++) {
-          row.push({ id: `${i}-${j}`, isRed: false });
-        }
-        newBoxes.push(row);
-      }
-
-      return { name: room.name, boxes: newBoxes };
-    });
-
-    setRooms(newRooms);
-
+  const toggleBoxColor = () => {
+    let {roomIndex, rowIndex, colIndex,id} = selectedRoomDetils
+    const updatedRooms = [...roomDetails]
+    updatedRooms[roomIndex].boxes[rowIndex][colIndex].is_alloted = !updatedRooms[roomIndex].boxes[rowIndex][colIndex].is_alloted;
+    setRoomDetails(updatedRooms);
+    setShowModal(false)
+    toast.success("Seat allocated successfully", {
+      autoClose : 1000
+    })
   };
-
-  const toggleBoxColor = (roomIndex, rowIndex, colIndex) => {
-    console.log(roomIndex + " " + colIndex + " " + rowIndex)
-    const updatedRooms = [...rooms];
-    console.log(updatedRooms, "before")
-    updatedRooms[roomIndex].boxes[rowIndex][colIndex].isRed = !updatedRooms[roomIndex].boxes[rowIndex][colIndex].isRed;
-    setRooms(updatedRooms);
-  };
-
-  // const toggleBoxColor = (roomIndex, rowIndex, colIndex) => {
-  //   setRooms((prevRooms) => {
-  //     const updatedRooms = [...prevRooms];
-  //     updatedRooms[roomIndex].boxes[rowIndex][colIndex].isRed = !updatedRooms[roomIndex].boxes[rowIndex][colIndex].isRed;
-  //     return updatedRooms;
-  //   });
-  // };
-  
-
   return (
     <>
-     <div className='container'>
-            <div className='row'>
-      {rooms.map((room, roomIndex) => (
-       
-        <div key={roomIndex} className='col-lg-4 col-md-12 room-container'>
-          <p>{room.name}</p>
-          <div className="room">
-            {room.boxes.map((row, rowIndex) => (
-              <div className="row" key={rowIndex}>
-                {row.map((box, colIndex) => (
-                  <div
-                    className={`box ${box.isRed ? 'red-box' : 'grey-box'}`}
-                    key={box.id}
-                    onClick={() => (      
-                      toggleBoxColor(roomIndex, rowIndex, colIndex)
-                      
-                      )}
-                  >{rowIndex+"-"+colIndex}</div>
+      <div className='container'>
+        <div className='row'>
+          {roomDetails.map((room, roomIndex) => (
+            <div key={roomIndex} className='col-lg-4 col-md-6 col-sm-12 my-4 room-container'>
+              <p>{room.name}</p>
+              <div className='room'>
+                {room.boxes.map((row, rowIndex) => (
+                  <div className='row' key={rowIndex}>
+                    {row.map((box, colIndex) => (
+                      <div
+                        className={`box ${box.is_alloted ? 'red-box' : 'grey-box'}`}
+                        key={box._id}
+                        
+                        onClick={() => { 
+                          
+                           if(!box.is_alloted){
+                            setSelectedRoomDetails({
+                              name : room.name,
+                              id : box._id,
+                              rowIndex : rowIndex,
+                              colIndex : colIndex,
+                              roomIndex : roomIndex,
+                              
+                            })
+                            setShowModal(true)
+                            
+                           }
+                          else{
+                            toast.error("Not available", {
+                              autoClose: 900, // Set the autoClose time in milliseconds (2 seconds in this example)
+                            });
+                          }
+                          
+                        }} // Open the modal when a box is clicked
+                      >
+                        <i class="fa-solid fa-couch"></i>
+                      </div>
+                    ))}
+                  </div>
                 ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-       
-      ))}
-       </div>
-        </div>
-      
+      </div>
+
+      {/* Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Want to book seat in {selectedRoomDetils.name}?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={toggleBoxColor}>Confirm</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

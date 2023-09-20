@@ -20,7 +20,7 @@ mongoose.connect(process.env.mongo_connection_string)
 
 const roomRouter = require("./Routes/room")
 
-app.use("/add-room",roomRouter )
+app.use("/room",roomRouter )
 
 
 

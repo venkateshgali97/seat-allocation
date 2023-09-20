@@ -48,8 +48,8 @@ p {
 
 /* Style for boxes */
 .box {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   margin: 2px;
@@ -58,7 +58,7 @@ p {
 
 /* Style for red boxes */
 .red-box {
-  background-color: #19105b;
+  background-image: linear-gradient(#19105b, #472067, #7c3375, #FF6196);
   border: 1px solid #ccc; /* Maintain the border for red boxes */
   margin: 2px;
   color: white;
